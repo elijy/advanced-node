@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const requireLogin = require('../middlewares/requireLogin');
+const cleanCache = require('../middlewares/cleanCache');
 const cache = require('../services/cache');
+
 
 const Blog = mongoose.model('Blog');
 
@@ -14,10 +16,10 @@ module.exports = app => {
     res.send(blog);
   });
 
-  app.get('/api/blogs', requireLogin, async (req, res) => {
+  app.get('/api/blogs', requireLogin, cleanCache, async (req, res) => {
 
     // IF not in the cache then call the db
-    const blogs = await Blog.find({ _user: req.user.id }).cache();
+    const blogs = await Blog.find({ _user: req.user.id }).cache({ key: req.user.id });
     // Send it back to the thing
     res.send(blogs);
 

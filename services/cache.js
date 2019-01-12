@@ -5,13 +5,14 @@ const util = require('util');
 // Set up redis
 const redisUrl = 'redis://127.0.0.1:6379';
 const client = redis.createClient(redisUrl);
-client.get = util.promisify(client.get); // Change this to use promises instead of callbacks
+client.hget = util.promisify(client.hget); // Change this to use promises instead of callbacks
 
 // Save a reference to the original exec function
 const exec = mongoose.Query.prototype.exec;
 
 // Build a chainable function that we can add to any query call if we want to use caching or not
-mongoose.Query.prototype.cache = function () {
+mongoose.Query.prototype.cache = function (options = {}) {
+  this.hashKey = JSON.stringify(options.key || '') // This is to be used be nested hashes, so if you want to cache something, you need to say what top level key you want to hash it on, we use stringify to make sure its a string no matter what they pass in
   this.useCache = true; // this is attached to the Query object so we can reference in the exec function
   return this; // CHAINABLE
 }
@@ -25,7 +26,7 @@ mongoose.Query.prototype.exec = async function () {
   const key = JSON.stringify(Object.assign({}, this.getQuery(), { collection: this.mongooseCollection.name }));
 
   // Check redis first
-  const cacheValue = await client.get(key);
+  const cacheValue = await client.hget(this.hashKey, key);
 
   // It was in the cache
   if (cacheValue) {
@@ -44,7 +45,15 @@ mongoose.Query.prototype.exec = async function () {
   const result = await exec.apply(this, arguments);
 
   // Store the result in the cache
-  client.set(key, JSON.stringify(result), 'EX', 10);
+  client.hset(this.hashKey, key, JSON.stringify(result));
+  client.expire(this.hashKey, 10)
 
   return result;
+}
+
+module.exports = {
+  // A function to clear our nested hash keys 
+  clearHash: function (hashKey) {
+    client.del(JSON.stringify(hashKey))
+  }
 }
