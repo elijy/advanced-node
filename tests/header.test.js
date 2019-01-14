@@ -58,7 +58,11 @@ test.only('Logged in should show logout button', async () => {
     value: sig
   })
 
+  await page.goto('localhost:3000') // Finally just call a refresh because now the cookies are set you login
   // =========== FAKING AUTH ===========
-  await page.goto('localhost:3000')
+
+  await page.waitFor('a[href="/auth/logout"]');
+  const text = await page.$eval('a[href="/auth/logout"]', el => el.innerHTML);
+  expect(text).toEqual('Logout')
 
 })
