@@ -60,3 +60,40 @@ describe('When logged in', async() => {
     
   })
 })
+
+describe('When user is not logged in', async() => {
+  test('User can not make a blog post', async() => {
+    // This evaluate function is a way to run things in the chromium console
+    const result = await page.evaluate(
+      () => {
+        return fetch('/api/blogs', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            title: 'My Title',
+            content: 'My content'
+          })
+        }).then(res => res.json()); // This is an ism of the fetch api
+      }
+    )
+    expect(result).toEqual({error: 'You must log in!'})
+  })
+  test('User can not get a list of blog posts', async() => {
+    // This evaluate function is a way to run things in the chromium console
+    const result = await page.evaluate(
+      () => {
+        return fetch('/api/blogs', {
+          method: 'GET',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then(res => res.json()); // This is an ism of the fetch api
+      }
+    )
+    expect(result).toEqual({error: 'You must log in!'})
+  })
+})
