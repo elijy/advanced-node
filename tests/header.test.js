@@ -1,24 +1,20 @@
 const puppeteer = require('puppeteer');
-const sessionFactory = require('./factories/sessionFactory');
-const userFactory = require('./factories/userFactory');
+const Page = require('./helpers/page');
 
-let browser, page;
+let page;
 
 beforeEach(async () => {
-  browser = await puppeteer.launch({
-    headless: false
-  }) // How to launch a browser in puppeteer
-  page = await browser.newPage(); // how to create a new tab
-
+  // Now all the browser and page init is wrapped in our custom Page class;
+  page = await Page.build();
   await page.goto('localhost:3000'); // Navigation fam
 })
 
 afterEach(async () => {
-  await browser.close(); // Close the browser
+  await page.close(); // Close the browser
 })
 
 test('Check header text', async () => {
-  const text = await page.$eval('a.brand-logo', el => el.innerHTML);
+  const text = await page.getContentsOf('a.brand-logo');
   expect(text).toEqual('Blogster');
 })
 
@@ -29,27 +25,8 @@ test('Start login', async () => {
 })
 
 test('Logged in should show logout button', async () => {
-
-  // =========== FAKING AUTH ===========
-  const user = await userFactory();
-  const {session, sig} = sessionFactory(user); // Pull out our session stuff from the factory
-
-  // Finally set the fake cookies
-  await page.setCookie({
-    name: 'session',
-    value: session
-  })
-
-  await page.setCookie({
-    name: 'session.sig',
-    value: sig
-  })
-
-  await page.goto('localhost:3000') // Finally just call a refresh because now the cookies are set you login
-  // =========== FAKING AUTH ===========
-
-  await page.waitFor('a[href="/auth/logout"]');
-  const text = await page.$eval('a[href="/auth/logout"]', el => el.innerHTML);
+  await page.login() // Now this function is moved to the helper
+  const text = await page.getContentsOf('a[href="/auth/logout"]');
   expect(text).toEqual('Logout')
 
 })
