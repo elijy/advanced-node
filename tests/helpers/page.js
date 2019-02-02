@@ -41,7 +41,7 @@ class CustomPage {
       value: sig
     })
 
-    await this.page.goto('localhost:3000') // Finally just call a refresh because now the cookies are set you login
+    await this.page.goto('localhost:3000/blogs') // Finally just call a refresh because now the cookies are set you login
     await this.page.waitFor('a[href="/auth/logout"]');
   }
   
