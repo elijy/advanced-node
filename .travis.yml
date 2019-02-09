@@ -1,0 +1,31 @@
+# Tell travis what language
+language: node_js
+# What version of that language
+node_js:
+  - "8"
+# What OS to run our VM in
+dist: trusty
+# Services that we need to run our suite
+services:
+  - mongodb
+  - redis-server
+# Set up our enviornment variables
+env:
+  - NODE_ENV=ci PORT=3000
+# Build a cache to make things faster
+cache:
+  direcotires:
+    - node_modules
+    - client/node_modules
+# Make sure we set up everything for our project on the VM before we run
+install:
+  - npm install
+  - npm run build
+# Run what we actually want to run
+script:
+  # nohup means dont kill our processes if the shell dies
+  # the trailing & means run our command in the background
+  - nohup npm run start &
+  # Because we're running the shell in the background we need to make sure it actually builds before running the test
+  - sleep 3
+  - npm run test

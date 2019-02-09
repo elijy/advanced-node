@@ -7,7 +7,8 @@ class CustomPage {
   // Static function
   static async build () {
     const browser = await puppeteer.launch({
-        headless: false
+        headless: true,
+        args: ['--no-sandbox']
       })
     const page = await browser.newPage();
     const customPage = new CustomPage(page);
@@ -41,7 +42,7 @@ class CustomPage {
       value: sig
     })
 
-    await this.page.goto('localhost:3000/blogs') // Finally just call a refresh because now the cookies are set you login
+    await this.page.goto('https://localhost:3000/blogs') // Finally just call a refresh because now the cookies are set you login
     await this.page.waitFor('a[href="/auth/logout"]');
   }
   

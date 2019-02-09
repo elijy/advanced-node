@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 const redis = require('redis');
 const util = require('util');
+const keys = require('./config/keys.js');
 
 // Set up redis
-const redisUrl = 'redis://127.0.0.1:6379';
+const redisUrl = keys.redisUrl;
 const client = redis.createClient(redisUrl);
 client.hget = util.promisify(client.hget); // Change this to use promises instead of callbacks
 
@@ -52,7 +53,7 @@ mongoose.Query.prototype.exec = async function () {
 }
 
 module.exports = {
-  // A function to clear our nested hash keys 
+  // A function to clear our nested hash keys
   clearHash: function (hashKey) {
     client.del(JSON.stringify(hashKey))
   }
