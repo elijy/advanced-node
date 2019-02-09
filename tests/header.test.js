@@ -6,7 +6,7 @@ let page;
 beforeEach(async () => {
   // Now all the browser and page init is wrapped in our custom Page class;
   page = await Page.build();
-  await page.goto('https://localhost:3000'); // Navigation fam
+  await page.goto('http://localhost:3000'); // Navigation fam
 })
 
 afterEach(async () => {

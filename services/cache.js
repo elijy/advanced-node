@@ -1,11 +1,10 @@
 const mongoose = require('mongoose');
 const redis = require('redis');
 const util = require('util');
-const keys = require('./config/keys.js');
+const keys = require('../config/keys.js');
 
 // Set up redis
-const redisUrl = keys.redisUrl;
-const client = redis.createClient(redisUrl);
+const client = redis.createClient(keys.redisUrl);
 client.hget = util.promisify(client.hget); // Change this to use promises instead of callbacks
 
 // Save a reference to the original exec function
