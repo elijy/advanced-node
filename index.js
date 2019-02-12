@@ -26,6 +26,7 @@ app.use(passport.session());
 
 require('./routes/authRoutes')(app);
 require('./routes/blogRoutes')(app);
+require('./routes/uploadRoutes')(app); // Immeditialy invoke the function
 
 if (['production', 'ci'].includes(process.env.NODE_ENV)) {
   app.use(express.static('client/build'));
